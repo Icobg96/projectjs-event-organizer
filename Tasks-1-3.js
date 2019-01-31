@@ -1,11 +1,3 @@
-var client = {
-    name : "",
-    lastName : "",
-    gendar : "",
-    age : -1,
-    amountMony : 0,
-    vipPoints : 0
-}
 var systemIsClose=false;
 var clients=[];
 var events=[];
@@ -13,6 +5,17 @@ function closeOrOpenSystem(){
 
     systemIsClose=(!systemIsClose);
 
+}
+function addClient(firstName,lastName,gender,age,amountMony){
+    if(systemIsClose){
+        console.log('system is closed');
+        return;
+    }
+     if(typeof amountMony !== 'number'||amountMony<0){
+         amountMony=0;
+     }
+
+    clients.push({firstName,lastName,gender,age,amountMony,vipPoints : 0});
 }
 function getEventById(eventId){
     for (let index = 0; index < events.length; index++) {
@@ -25,12 +28,13 @@ function getEventById(eventId){
      }
 }
 function addEvent(name,access,date,price){
-    if (systemIsClose && typeof name !== 'string'){
+    if (systemIsClose || typeof name !== 'string'|| name.length===0){
+
         return;
     }
     let eventId;
     if(events.length===0){
-        eventId=0;
+        eventId=1;
     }else{
         eventId=events[events.length-1].id+1;
     }
@@ -70,17 +74,13 @@ function addEvent(name,access,date,price){
         console.log('This eventis not exist');
         return;
     }
-      event=event.event
-    if(typeof newName!=='string'){
-        console.log('Wrong name')
-        return;
+    event=event.event;
+    if(typeof newName==='string' && newName.length>0){  
+        event.name=newName;
     }
-    event.name=newName;
-    if(typeof NewAccess!=='boolean'){
-        console.log('access is not changed')
-        return;
+    if(typeof NewAccess==='boolean'){
+        event.access=NewAccess;
     }
-    event.access=NewAccess;
     if (date instanceof Date){
         event.date=date;
     }
@@ -90,10 +90,11 @@ function addEvent(name,access,date,price){
  }
  
  function removeEventById(eventId){
-    let index=getEventById(eventId).index;    
-    events.splice(index,1);
-    alert("Event remove sucssesful")
-       
+    let event=getEventById(eventId);    
+    if(event){
+        events.splice(event.index,1);
+        console.log("Event remove sucssesful");
+    }
  }
  function removeClientFromEvent(event,client){
      if(event.isArchived){
@@ -111,10 +112,12 @@ function addEvent(name,access,date,price){
      let checkForVipOrPey=function(){
         if (client.vipPoints===5){
             client.vipPoints=0;
+            console.log('successfully insert Client');
         }else{
             client.amountMony-=event.price;
             client.vipPoints++;
             event.income+=event.price;
+            console.log('successfully insert Client');
         }
      }
      if(typeof event !=='object'){
@@ -130,7 +133,7 @@ function addEvent(name,access,date,price){
         return;
      }
      if(!event.access){
-        if(client.age>=18){
+        if(client.age >= 18){
 
             checkForVipOrPey();
             event.clients.push(client);
@@ -143,6 +146,7 @@ function addEvent(name,access,date,price){
         event.clients.push(client);
      }
  }
+
  function getEventWithMostClient(){
      let clientCount = events.map(e => {
              return {
@@ -197,29 +201,33 @@ function addEvent(name,access,date,price){
       }
 
  }
- function listingClientsFromEvent(event){
+ function listingClientsFromEvent(event,filterFunction,filterParam){
      let clients=event.clients;
+     let filterResult;
      for (let index = 0; index < clients.length; index++) {
-     
-        console.log('First name : '+clients[index].name + ' | last Name : '+clients[index].lastName,+' | gender :'+clients[index].gendar+
-                     ' | age : '+clients[index].age+' | amount mony : '+clients[index].amountMony+' | vip points : '+clients[index].vipPoints);
-        console.log('---------------------------------------------------------------------------------------------');             
-         
+
+        filterResult = (typeof filterFunction === 'function') ? filterFunction(clients[index],filterParam) : true;
+
+        if(filterResult){
+                console.log('First name : '+clients[index].firstName + ' | last Name : '+clients[index].lastName+' | gender : '+clients[index].gender+
+                            ' | age : '+clients[index].age+' | amount mony : '+clients[index].amountMony+' | vip points : '+clients[index].vipPoints);
+                console.log('---------------------------------------------------------------------------------------------');             
+        }
      }
  }
  function dataVisualization(event){
 
     let name = event.name;
-    let access = event.access;
+    let access = event.access ? 'underaged access' : '18+';
     let date = event.date;
     let price = event.price;
     let rating = event.rating > 0 ? event.rating : 'an update is expected';
-    name = access ? ('# ' + name) : ('* ' + name);
+    name = event.access  ? ('# ' + name) : ('* ' + name);
     name = (price > 0) ? ('$ ' + name) : ('! ' + name);
     name = event.isArchived ? ('~ ' + name) : name;
     console.log('name : ' + name + ' | access : ' + access + ' | date : ' + date + ' | price : ' +
                 price + ' | rating : ' + rating);
-                console.log('---------------------------------------------------------------------------------------------');             
+    console.log('---------------------------------------------------------------------------------------------');             
 
  }
  function eventListing(firstFilterFunction,firstFilterParam,secondFilterFunction,secondFilterParam){
@@ -254,12 +262,18 @@ var filter={
                         }
                     return false;
                 },
-     byArchived: function(event,isArchived){
+     byArchived : function(event,isArchived){
                      if(event.isArchived===isArchived){
                         return true;
                     }            
                     return false;
-     }          
+     },
+     byGender : function(client,gender){
+                    if(client.gender.toLocaleLowerCase()===gender.toLocaleLowerCase()){
+                        return true;
+                    }
+                    return false;
+                }        
 
 }
 function getAllEventsWithFreeAccess(){
@@ -276,101 +290,69 @@ function getEventIncome(archivedEvent){
     }
     console.log('name : ' + archivedEvent.name + ' | income : ' + archivedEvent.income);
 }
- addEvent('fsfs',true);
- addEvent('fsfgdss',false);
- addEvent('fsfs11212',true);
- addClientToEvent(events[1],{   
-     name:"ico",
-     lastName:"asds",
-     gendar:"m",
-     age:22});
-     addClientToEvent(events[0],{   
-        name:"ico",
-        lastName:"asds",
-        gendar:"m",
-        age:22});
-        addClientToEvent(events[0],{   
-            name:"ico",
-            lastName:"asds",
-            gendar:"m",
-            age:22});
-arhivateEvent(events[0]);
-//closeOrOpenSystem();
-//console.log(systemIsClose);
+//here adding events
+addEvent('birthday',true,new Date('12/02/2019'),20);// index 0
+addEvent('Rock fest',false,new Date('09/03/2019'),10);// index 1
+addEvent('Plovdiv european capital of culture',true,new Date('15/01/2019'));// index 2
+addEvent('beer fest',false,new Date('20/02/2019'),15);// index 3
+addEvent('retro pop-folk party secrets',false,new Date('04/02/2019'),5);// index 4
+addEvent('circus2',false,new Date('05/05/2019'),3.5);// index 5
+addEvent('circus',true,new Date('08/05/2019'),35);// index 6
 
-//console.log(names);
-//names.splice(1,1);
-//console.log(names.splice(1,1));
-eventListing(filter.byArchived,false,filter.byAccess,false);
-//listingClientsFromEvent(events[0]);
+//here adding clients
+addClient('Ivan','Petov','male',18,60.00);// index 0
+addClient('Nina','Stoqnoa','fmale',15,40);// index 1
+addClient('Genadi','Dimitrov','male',22,100.00);// index 2
+addClient('Victoriya','Ivanova','fmale',40,200.00);// index 3
+addClient('Petar','Katsarov','male',17,70.00);// index 4
+addClient('Preslav','Milev','male',24,80.00);// index 5
+addClient('Ivelina','Kirova','fmale',16,66.00);// index 6
+
+//here adding clients to events
+addClientToEvent(events[0],clients[0]); //successfully insert Client
+addClientToEvent(events[1],clients[0]); //successfully insert Client
+addClientToEvent(events[1],clients[1]); //This client does not meet age restrictions
+addClientToEvent(events[1],clients[2]); //successfully insert Client
+addClientToEvent(events[1],clients[6]); //This client does not meet age restrictions
+for(let i=0; i < 7; i++){
+    addClientToEvent(events[2],clients[i]); //successfully insert all Clients in this event
+}
+addClientToEvent(events[3],clients[0]); //successfully insert Client
+addClientToEvent(events[3],clients[2]); //successfully insert Client 
+addClientToEvent(events[3],clients[3]); //successfully insert Client
+addClientToEvent(events[3],clients[6]); //This client does not meet age restrictions
+addClientToEvent(events[6],clients[0]); //Тhis client does not have enough money
+addClientToEvent(events[6],clients[1]); //successfully insert Client
+addClientToEvent(events[6],clients[3]); //successfully insert Client
+
+console.log('===========================================================================================================');
+console.log('Listing all eventss');
+console.log('===========================================================================================================');
+
+eventListing();
+
+console.log('===========================================================================================================');
+console.log('Listing after changed');
+console.log('===========================================================================================================');
+editEvent(1,'birthday 18+');
+editEvent(1,null,false);
+eventListing();
+console.log('===========================================================================================================');
+console.log('Listing after remove');
+console.log('===========================================================================================================');
+//here delete event
+removeEventById(6); //delete event with id : 6 "circus2"
+eventListing();
+
+//here remove client from event
+removeClientFromEvent(events[2],clients[0]); //remove "ivan petrov" from "Plovdiv european capital of culture"
+console.log('===========================================================================================================');
+console.log('Listing clients from "Plovdiv european capital of culture"');
+console.log('===========================================================================================================');
+listingClientsFromEvent(events[2]);
+console.log('===========================================================================================================');
+console.log('Listing clients from "Plovdiv european capital of culture" filter by gender');
+console.log('===========================================================================================================');
+listingClientsFromEvent(events[2],filter.byGender,'fmale');
 
 
-
-
- //date.setFullYear(1997);
- //date.setMonth(9);
- //date.setDate(23);
-
-
-
-
- /*function addButton(){
-    let eventName = document.getElementById("eventName").value;
-    let eventAccess=document.getElementById("access").checked;
-    let eventId;
-    if(events.length===0){
-        eventId=0;
-    }else{
-        eventId=events[events.length-1].id+1;
-    }
-    addEvent(eventId,eventName,eventAccess);
-    console.clear();
-      for(let i=0;i<events.length;i++){
-        console.log(events[i].id);
-        console.log(events[i].name);
-        console.log(events[i].access);
-        }
-
- }
- function showAllEvents(){
-     var table=document.getElementById("myTable");
-     if(table!=null){
-         document.body.removeChild(table);
-     }
-     
-     var x = document.createElement("TABLE");
-     x.setAttribute("id", "myTable");
-     document.body.appendChild(x);
-     for (let index = 0; index < events.length; index++) {
-
-          var y = document.createElement("TR");
-          y.setAttribute("id", "myTr"+index);
-          document.getElementById("myTable").appendChild(y);
-
-          var z = document.createElement("TD");
-          var z1 = document.createElement("TD");
-          var z2 = document.createElement("TD");
-          var t = document.createTextNode(events[index].id);
-          var td = document.createTextNode(events[index].name);
-          var td1 = document.createTextNode(events[index].access);
-          z.appendChild(t);
-          z1.appendChild(td);
-          z2.appendChild(td1);
-          
-          document.getElementById("myTr"+index).appendChild(z);
-          document.getElementById("myTr"+index).appendChild(z1);
-          document.getElementById("myTr"+index).appendChild(z2);
-         
-     }
- }*/
- //addEvent(1,"asd",true);
- //addEvent(2,"dsa",false);
- //addEvent(3,"fds",true);
- //for(let i=0;i<events.length;i++){
- //console.log(events[i].id);
- //}
- //removeEventById(2);
- //for(let i=0;i<events.length;i++){
-  //  console.log(events[i].id);
-  //  }
-  
