@@ -386,6 +386,8 @@ vote(clients[1],events[2],2);
 vote(clients[2],events[2],3);
 vote(clients[3],events[2],7);
 vote(clients[3],events[2],5);
+// show income for "birthday 18+"
+getEventIncome(events[0]);
 
 
 
