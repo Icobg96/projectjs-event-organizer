@@ -186,19 +186,25 @@ function addEvent(name,access,date,price){
          console.log('rating must be between 1-10');
          return;
      }
+     if(event.clients.indexOf(client)===-1){
+         console.log('you are not client of this event');
+         return;
+      }
      for (let index = 0; index < event.votedClients.length; index++) {
           if(event.votedClients[index]===client){
               console.log('you already vote');
               return;
           }
-          let currentRate=(rate*3)/5;
-          event.votedClients.push(client);
-          if(event.rating===0){
-            event.rating=currentRate;
-            return;
-          }
-          event.rating=(event.rating+currentRate)/2;
-      }
+        }
+        let currentRate=(rate*3)/5;
+        event.votedClients.push(client);
+        console.log('successfull vote');
+        if(event.rating===0){
+          event.rating=currentRate;
+          return;
+        }
+        event.rating=(event.rating+currentRate)/2;
+      
 
  }
  function listingClientsFromEvent(event,filterFunction,filterParam){
@@ -221,7 +227,7 @@ function addEvent(name,access,date,price){
     let access = event.access ? 'underaged access' : '18+';
     let date = event.date;
     let price = event.price;
-    let rating = event.rating > 0 ? event.rating : 'an update is expected';
+    let rating = (event.rating > 0) ? event.rating : 'an update is expected';
     name = event.access  ? ('# ' + name) : ('* ' + name);
     name = (price > 0) ? ('$ ' + name) : ('! ' + name);
     name = event.isArchived ? ('~ ' + name) : name;
@@ -381,13 +387,25 @@ getEventWithMostClient();
 
 arhivateEvent(events[2]);
  // vote for event "Plovdiv european capital of culture" filter by gender'
-vote(clients[0],events[2],5);
-vote(clients[1],events[2],2);
-vote(clients[2],events[2],3);
-vote(clients[3],events[2],7);
-vote(clients[3],events[2],5);
+vote(clients[0],events[2],5); //you are not client of this event
+vote(clients[1],events[2],2); //successfull vote
+vote(clients[2],events[2],3); //successfull vote
+vote(clients[3],events[2],7); //successfull vote
+vote(clients[3],events[2],5); //successfull vote
+console.log('===========================================================================================================');
+console.log("Show all event 'Plovdiv european capital of culture' are with changed rating ");
+console.log('===========================================================================================================');
+
+eventListing();
+
+console.log('===========================================================================================================');
+console.log('Show income');
+console.log('===========================================================================================================');
 // show income for "birthday 18+"
 getEventIncome(events[0]);
+
+
+
 
 
 
