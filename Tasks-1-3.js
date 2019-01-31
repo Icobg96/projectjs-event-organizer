@@ -332,6 +332,25 @@ console.log('===================================================================
 eventListing();
 
 console.log('===========================================================================================================');
+console.log('Listing all events filter by access');
+console.log('===========================================================================================================');
+
+eventListing(filter.byAccess,true);
+
+console.log('===========================================================================================================');
+console.log('Listing all events filter by name');
+console.log('===========================================================================================================');
+
+eventListing(filter.byName,'birthday');
+
+console.log('===========================================================================================================');
+console.log('Listing all events which are arcived and access is free');
+console.log('===========================================================================================================');
+
+arhivateEvent(events[0]);
+eventListing(filter.access,true,filter.byArchived,true);
+
+console.log('===========================================================================================================');
 console.log('Listing after changed');
 console.log('===========================================================================================================');
 editEvent(1,'birthday 18+');
@@ -354,5 +373,21 @@ console.log('===================================================================
 console.log('Listing clients from "Plovdiv european capital of culture" filter by gender');
 console.log('===========================================================================================================');
 listingClientsFromEvent(events[2],filter.byGender,'fmale');
+
+console.log('===========================================================================================================');
+console.log('Listing event with most clients');
+console.log('===========================================================================================================');
+getEventWithMostClient();
+
+arhivateEvent(events[2]);
+ // vote for event "Plovdiv european capital of culture" filter by gender'
+vote(clients[0],events[2],5);
+vote(clients[1],events[2],2);
+vote(clients[2],events[2],3);
+vote(clients[3],events[2],7);
+vote(clients[3],events[2],5);
+
+
+
 
 
